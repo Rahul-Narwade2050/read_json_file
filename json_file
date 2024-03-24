@@ -1,0 +1,74 @@
+path='/FileStore/tables/file1.json'
+
+
+from pyspark.sql import*
+from pyspark.sql.types import*
+from pyspark.sql.functions import*
+df=spark.read.format('json').load(path)
+#df=spark.read.format('json').option('multiline',True).load(path)
+df.printSchema()
+
+
+root
+ |-- code: long (nullable = true)
+ |-- message: string (nullable = true)
+ |-- restaurants: array (nullable = true)
+ |    |-- element: struct (containsNull = true)
+ |    |    |-- restaurant: struct (nullable = true)
+ |    |    |    |-- R: struct (nullable = true)
+ |    |    |    |    |-- res_id: long (nullable = true)
+ |    |    |    |-- apikey: string (nullable = true)
+ |    |    |    |-- average_cost_for_two: long (nullable = true)
+ |    |    |    |-- book_url: string (nullable = true)
+ |    |    |    |-- cuisines: string (nullable = true)
+ |    |    |    |-- currency: string (nullable = true)
+ |    |    |    |-- deeplink: string (nullable = true)
+ |    |    |    |-- establishment_types: array (nullable = true)
+ |    |    |    |    |-- element: string (containsNull = true)
+ |    |    |    |-- events_url: string (nullable = true)
+ |    |    |    |-- featured_image: string (nullable = true)
+ |    |    |    |-- has_online_delivery: long (nullable = true)
+ |    |    |    |-- has_table_booking: long (nullable = true)
+ |    |    |    |-- id: string (nullable = true)
+ |    |    |    |-- is_delivering_now: long (nullable = true)
+ |    |    |    |-- location: struct (nullable = true)
+ |    |    |    |    |-- address: string (nullable = true)
+ |    |    |    |    |-- city: string (nullable = true)
+ |    |    |    |    |-- city_id: long (nullable = true)
+ |    |    |    |    |-- country_id: long (nullable = true)
+ |    |    |    |    |-- latitude: string (nullable = true)
+ |    |    |    |    |-- locality: string (nullable = true)
+ |    |    |    |    |-- locality_verbose: string (nullable = true)
+ |    |    |    |    |-- longitude: string (nullable = true)
+ |    |    |    |    |-- zipcode: string (nullable = true)
+ |-- results_found: long (nullable = true)
+ |-- results_shown: long (nullable = true)
+ |-- results_start: string (nullable = true)
+ |-- status: string (nullable = true)
+ 
+ 
+ ndf=df.withColumn('restaurants',explode(col('restaurants')))
+ 
+ structure_data=ndf.withColumn('res_id',col('restaurants.restaurant.R.res_id'))\
+    .withColumn('apikey',col('restaurants.restaurant.apikey'))\
+    .withColumn('average_cost_for_two',col('restaurants.restaurant.average_cost_for_two'))\
+    .withColumn('book_url',col('restaurants.restaurant.book_url'))\
+    .withColumn('cuisines',col('restaurants.restaurant.cuisines'))\
+    .withColumn('currency',col('restaurants.restaurant.currency'))\
+    .withColumn('deeplink',col('restaurants.restaurant.deeplink'))\
+    .withColumn('establishment_types',col('restaurants.restaurant.establishment_types'))\
+    .withColumn('events_url',col('restaurants.restaurant.events_url'))\
+    .withColumn('featured_image',col('restaurants.restaurant.featured_image'))\
+    .withColumn('has_online_delivery',col('restaurants.restaurant.has_online_delivery'))\
+    .withColumn('has_table_booking',col('restaurants.restaurant.has_table_booking'))\
+    .withColumn('id',col('restaurants.restaurant.id'))\
+    .withColumn('address',col('restaurants.restaurant.location.address'))\
+    .withColumn('city',col('restaurants.restaurant.location.city'))\
+    .withColumn('city_id',col('restaurants.restaurant.location.city_id'))\
+    .withColumn('country_id',col('restaurants.restaurant.location.country_id'))\
+    .withColumn('latitude',col('restaurants.restaurant.location.latitude'))\
+    .withColumn('locality',col('restaurants.restaurant.location.locality'))\
+    .withColumn('locality_verbose',col('restaurants.restaurant.location.locality_verbose'))\
+    .withColumn('longitude',col('restaurants.restaurant.location.longitude'))\
+    .withColumn('zipcode',col('restaurants.restaurant.location.zipcode'))\
+    .drop('restaurants')\
